@@ -180,7 +180,7 @@ func _gui_input(event: InputEvent) -> void:
 			MOUSE_BUTTON_WHEEL_DOWN:
 				if event.pressed:
 					last_scroll_type = SCROLL_TYPE.WHEEL
-					if event.shift_pressed:
+					if event.shift_pressed or not should_scroll_vertical():
 						if should_scroll_horizontal():
 							velocity.x -= speed
 					else:
