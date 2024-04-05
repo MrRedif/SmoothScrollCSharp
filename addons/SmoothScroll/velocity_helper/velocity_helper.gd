@@ -1,3 +1,4 @@
+@icon("icon.svg")
 extends Resource
 class_name VelocityHelper
 
