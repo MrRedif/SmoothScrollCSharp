@@ -9,20 +9,19 @@ var friction := 100000.0:
 	set(val): friction = max(val, 0.001)
 
 
-func _calculate_velocity_by_time(time:float) -> float:
+func _calculate_velocity_by_time(time: float) -> float:
 	if time <= 0.0: return 0.0
 	return time*time*time * friction
 
 
-func _calculate_time_by_velocity(velocity:float) -> float:
+func _calculate_time_by_velocity(velocity: float) -> float:
 	return pow(abs(velocity) / friction, 1.0/3.0)
 
 
-func _calculate_offset_by_time(time:float) -> float:
+func _calculate_offset_by_time(time: float) -> float:
 	time = max(time, 0.0)
 	return 1.0/4.0 * friction * time*time*time*time
 
 
-func _calculate_time_by_offset(offset:float) -> float:
+func _calculate_time_by_offset(offset: float) -> float:
 	return pow(abs(offset) * 4.0 / friction, 1.0/4.0)
-
