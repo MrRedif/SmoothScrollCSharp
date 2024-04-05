@@ -87,6 +87,10 @@ var content_dragging := false
 var scrollbar_hide_timer := Timer.new()
 ## Tween for hiding scroll bar
 var scrollbar_hide_tween : Tween
+## Tween for scroll x to
+var scroll_x_to_tween : Tween
+## Tween for scroll y to
+var scroll_y_to_tween : Tween
 ## [0,1] Mouse or touch's relative movement accumulation when overdrag[br]
 ## [2,3] Position where dragging starts[br]
 ## [4,5,6,7] Left_distance, right_distance, top_distance, bottom_distance
@@ -185,6 +189,7 @@ func _gui_input(event: InputEvent) -> void:
 						if should_scroll_vertical():
 							velocity.y -= speed
 					velocity_helper = wheel_velocity_helper
+					kill_scroll_to_tweens()
 			MOUSE_BUTTON_WHEEL_UP:
 				if event.pressed:
 					last_scroll_type = SCROLL_TYPE.WHEEL
@@ -195,6 +200,7 @@ func _gui_input(event: InputEvent) -> void:
 						if should_scroll_vertical():
 							velocity.y += speed
 					velocity_helper = wheel_velocity_helper
+					kill_scroll_to_tweens()
 			MOUSE_BUTTON_WHEEL_LEFT:
 				if event.pressed:
 					last_scroll_type = SCROLL_TYPE.WHEEL
@@ -205,6 +211,7 @@ func _gui_input(event: InputEvent) -> void:
 						if should_scroll_horizontal():
 							velocity.x += speed
 					velocity_helper = wheel_velocity_helper
+					kill_scroll_to_tweens()
 			MOUSE_BUTTON_WHEEL_RIGHT:
 				if event.pressed:
 					last_scroll_type = SCROLL_TYPE.WHEEL
@@ -215,12 +222,14 @@ func _gui_input(event: InputEvent) -> void:
 						if should_scroll_horizontal():
 							velocity.x -= speed
 					velocity_helper = wheel_velocity_helper
+					kill_scroll_to_tweens()
 			MOUSE_BUTTON_LEFT:
 				if event.pressed:
 					if !drag_with_mouse: return
 					content_dragging = true
 					last_scroll_type = SCROLL_TYPE.DRAG
 					init_drag_temp_data()
+					kill_scroll_to_tweens()
 				else:
 					content_dragging = false
 					velocity_helper = dragging_velocity_helper
@@ -239,8 +248,10 @@ func _gui_input(event: InputEvent) -> void:
 	if event is InputEventPanGesture:
 		if should_scroll_horizontal():
 			velocity.x = -event.delta.x * speed
+			kill_scroll_to_tweens()
 		if should_scroll_vertical():
 			velocity.y = -event.delta.y * speed
+			kill_scroll_to_tweens()
 	
 	if event is InputEventScreenTouch:
 		if event.pressed:
@@ -248,6 +259,7 @@ func _gui_input(event: InputEvent) -> void:
 			content_dragging = true
 			last_scroll_type = SCROLL_TYPE.DRAG
 			init_drag_temp_data()
+			kill_scroll_to_tweens()
 		else:
 			content_dragging = false
 			velocity_helper = dragging_velocity_helper
@@ -598,6 +610,16 @@ func get_child_boundary_dist(child_pos:Vector2, child_size_diff:Vector2) -> Vect
 		get_child_bottom_dist(child_pos.y, child_size_diff.y),
 	)
 
+func kill_scroll_x_to_tween() -> void:
+	if scroll_x_to_tween: scroll_x_to_tween.kill()
+
+func kill_scroll_y_to_tween() -> void:
+	if scroll_y_to_tween: scroll_y_to_tween.kill()
+
+func kill_scroll_to_tweens() -> void:
+	kill_scroll_x_to_tween()
+	kill_scroll_y_to_tween()
+
 ##### LOGIC
 ####################
 
@@ -646,21 +668,25 @@ func draw_debug() -> void:
 ## Scrolls to specific x position
 func scroll_x_to(x_pos: float, duration:float=0.5) -> void:
 	if not should_scroll_horizontal(): return
+	if content_dragging: return
 	velocity.x = 0.0
 	var size_x_diff = get_child_size_x_diff(content_node, true)
 	x_pos = clampf(x_pos, -size_x_diff, 0.0)
-	var tween = create_tween()
-	var tweener = tween.tween_property(self, "pos:x", x_pos, duration)
+	kill_scroll_x_to_tween()
+	scroll_x_to_tween = create_tween()
+	var tweener = scroll_x_to_tween.tween_property(self, "pos:x", x_pos, duration)
 	tweener.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUINT)
 
 ## Scrolls to specific y position
 func scroll_y_to(y_pos: float, duration:float=0.5) -> void:
 	if not should_scroll_vertical(): return
+	if content_dragging: return
 	velocity.y = 0.0
 	var size_y_diff = get_child_size_y_diff(content_node, true)
 	y_pos = clampf(y_pos, -size_y_diff, 0.0)
-	var tween = create_tween()
-	var tweener = tween.tween_property(self, "pos:y", y_pos, duration)
+	kill_scroll_y_to_tween()
+	scroll_y_to_tween = create_tween()
+	var tweener = scroll_y_to_tween.tween_property(self, "pos:y", y_pos, duration)
 	tweener.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUINT)
 
 ## Scrolls up a page
