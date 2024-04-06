@@ -10,7 +10,7 @@ metadata={
 
 [deps]
 
-source_file="res://addons/SmoothScroll/velocity_utility/icon.svg"
+source_file="res://addons/SmoothScroll/scroll_damper/icon.svg"
 dest_files=["res://.godot/imported/icon.svg-ab15342a73e61a79c8b3960fca89a8c3.ctex"]
 
 [params]

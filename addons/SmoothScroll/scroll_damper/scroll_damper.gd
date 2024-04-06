@@ -1,14 +1,14 @@
 @icon("icon.svg")
 extends Resource
-class_name VelocityUtility
+class_name ScrollDamper
 
 ## Abstract class
 
-## Magnetism. The higher the value, the faster it attracts. 
+## rebound_strength. The higher the value, the faster it attracts. 
 @export_range(0.0, 1.0, 0.001, "or_greater", "hide_slider")
-var magnetism := 400.0:
+var rebound_strength := 400.0:
 	set(val):
-		magnetism= max(val, 0.0)
+		rebound_strength= max(val, 0.0)
 
 
 # Abstract method
@@ -58,7 +58,7 @@ func slide(velocity: float, delta_time: float) -> Array:
 func attract(from: float, to: float, velocity: float, delta_time: float) -> float:
 	var dist = to - from
 	var target_vel = _calculate_velocity_to_dest(from, to)
-	velocity += magnetism * dist * delta_time \
+	velocity += rebound_strength * dist * delta_time \
 		 + _calculate_velocity_by_time(delta_time) * sign(dist)
 	if (
 		(dist > 0 and velocity >= target_vel) \

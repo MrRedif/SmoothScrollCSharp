@@ -1,5 +1,5 @@
-extends VelocityUtility
-class_name LinearVelocityUtility
+extends ScrollDamper
+class_name LinearScrollDamper
 
 
 ## Friction, not physical. 

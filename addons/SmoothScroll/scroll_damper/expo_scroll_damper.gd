@@ -1,5 +1,5 @@
-extends VelocityUtility
-class_name ExpoVelocityUtility
+extends ScrollDamper
+class_name ExpoScrollDamper
 
 
 ## Friction, not physical. 
