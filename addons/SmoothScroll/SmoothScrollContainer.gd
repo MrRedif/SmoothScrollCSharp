@@ -280,14 +280,14 @@ func _on_focus_changed(control: Control) -> void:
 	if focus_top < 0.0:
 		scroll_y_to(content_node.position.y - focus_top + follow_focus_margin)
 	
-	if focus_bottom > get_size_y():
-		scroll_y_to(content_node.position.y - focus_bottom + get_size_y() - follow_focus_margin)
+	if focus_bottom > get_spare_size_y():
+		scroll_y_to(content_node.position.y - focus_bottom + get_spare_size_y() - follow_focus_margin)
 	
 	if focus_left < 0.0:
 		scroll_x_to(content_node.position.x - focus_left + follow_focus_margin)
 	
-	if focus_right > get_size_x():
-		scroll_x_to(content_node.position.x - focus_right + get_size_x() - follow_focus_margin)
+	if focus_right > get_spare_size_x():
+		scroll_x_to(content_node.position.x - focus_right + get_spare_size_x() - follow_focus_margin)
 
 func _on_VScrollBar_scrolling() -> void:
 	v_scrollbar_dragging = true
@@ -537,22 +537,22 @@ func init_drag_temp_data() -> void:
 	]
 
 # Get container size x without v scroll bar 's width
-func get_size_x() -> float:
+func get_spare_size_x() -> float:
 	var size_x = size.x
 	if get_v_scroll_bar().visible:
 		size_x -= get_v_scroll_bar().size.x
 	return max(size_x, 0.0)
 
 # Get container size y without h scroll bar 's height
-func get_size_y() -> float:
+func get_spare_size_y() -> float:
 	var size_y = size.y
 	if get_h_scroll_bar().visible:
 		size_y -= get_h_scroll_bar().size.y
 	return max(size_y, 0.0)
 
 # Get container size without scroll bars' size
-func get_size() -> Vector2:
-	return Vector2(get_size_x(), get_size_y())
+func get_spare_size() -> Vector2:
+	return Vector2(get_spare_size_x(), get_spare_size_y())
 
 # Calculate the size x difference between this container and child node
 func get_child_size_x_diff(child: Control, clamp: bool) -> float:
@@ -560,8 +560,8 @@ func get_child_size_x_diff(child: Control, clamp: bool) -> float:
 	# Falsify the size of the child node to avoid errors 
 	# when its size is smaller than this container 's
 	if clamp:
-		child_size_x = max(child_size_x, get_size_x())
-	return child_size_x - get_size_x()
+		child_size_x = max(child_size_x, get_spare_size_x())
+	return child_size_x - get_spare_size_x()
 
 # Calculate the size y difference between this container and child node
 func get_child_size_y_diff(child: Control, clamp: bool) -> float:
@@ -569,8 +569,8 @@ func get_child_size_y_diff(child: Control, clamp: bool) -> float:
 	# Falsify the size of the child node to avoid errors 
 	# when its size is smaller than this container 's
 	if clamp:
-		child_size_y = max(child_size_y, get_size_y())
-	return child_size_y - get_size_y()
+		child_size_y = max(child_size_y, get_spare_size_y())
+	return child_size_y - get_spare_size_y()
 
 # Calculate the size difference between this container and child node
 func get_child_size_diff(child: Control, clamp_x: bool, clamp_y: bool) -> Vector2:
@@ -685,22 +685,22 @@ func scroll_y_to(y_pos: float, duration := 0.5) -> void:
 
 ## Scrolls up a page
 func scroll_page_up(duration := 0.5) -> void:
-	var destination = content_node.position.y + get_size_y()
+	var destination = content_node.position.y + get_spare_size_y()
 	scroll_y_to(destination, duration)
 
 ## Scrolls down a page
 func scroll_page_down(duration := 0.5) -> void:
-	var destination = content_node.position.y - get_size_y()
+	var destination = content_node.position.y - get_spare_size_y()
 	scroll_y_to(destination, duration)
 
 ## Scrolls left a page
 func scroll_page_left(duration := 0.5) -> void:
-	var destination = content_node.position.x + get_size_x()
+	var destination = content_node.position.x + get_spare_size_x()
 	scroll_x_to(destination, duration)
 
 ## Scrolls right a page
 func scroll_page_right(duration := 0.5) -> void:
-	var destination = content_node.position.x - get_size_x()
+	var destination = content_node.position.x - get_spare_size_x()
 	scroll_x_to(destination, duration)
 
 ## Adds velocity to the vertical scroll
@@ -717,7 +717,7 @@ func scroll_to_top(duration := 0.5) -> void:
 
 ## Scrolls to bottom
 func scroll_to_bottom(duration := 0.5) -> void:
-	scroll_y_to(get_size_y() - content_node.size.y, duration)
+	scroll_y_to(get_spare_size_y() - content_node.size.y, duration)
 
 ## Scrolls to left
 func scroll_to_left(duration := 0.5) -> void:
@@ -725,7 +725,7 @@ func scroll_to_left(duration := 0.5) -> void:
 
 ## Scrolls to right
 func scroll_to_right(duration := 0.5) -> void:
-	scroll_x_to(get_size_x() - content_node.size.x, duration)
+	scroll_x_to(get_spare_size_x() - content_node.size.x, duration)
 
 func is_outside_top_boundary(y_pos: float = pos.y) -> bool:
 	var size_y_diff = get_child_size_y_diff(content_node,true)
