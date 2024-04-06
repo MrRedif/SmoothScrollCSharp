@@ -1,7 +1,7 @@
 [gd_scene load_steps=7 format=3 uid="uid://xqy4fhlaf2q3"]
 
 [ext_resource type="Script" path="res://addons/SmoothScroll/SmoothScrollContainer.gd" id="1_su8ig"]
-[ext_resource type="Script" path="res://addons/SmoothScroll/velocity_helper/expo_velocity_helper.gd" id="2_1er1u"]
+[ext_resource type="Script" path="res://addons/SmoothScroll/velocity_utility/expo_velocity_utility.gd" id="2_ibjlc"]
 
 [sub_resource type="GDScript" id="GDScript_xo176"]
 script/source = "extends Control
@@ -16,17 +16,17 @@ func _on_h_slider_value_changed(value):
 	$Label.text = \"FPS: \" + str($HSlider.value)
 "
 
-[sub_resource type="Resource" id="Resource_gdc1a"]
-script = ExtResource("2_1er1u")
+[sub_resource type="Resource" id="Resource_dgmji"]
+script = ExtResource("2_ibjlc")
 friction = 10000.0
 minimum_velocity = 0.4
-attracting_strength = 400.0
+magnetism = 400.0
 
-[sub_resource type="Resource" id="Resource_xp6po"]
-script = ExtResource("2_1er1u")
+[sub_resource type="Resource" id="Resource_nvbjt"]
+script = ExtResource("2_ibjlc")
 friction = 10000.0
 minimum_velocity = 0.4
-attracting_strength = 400.0
+magnetism = 400.0
 
 [sub_resource type="GDScript" id="GDScript_xu50n"]
 script/source = "extends RichTextLabel
@@ -76,8 +76,8 @@ offset_top = 147.0
 offset_right = 649.0
 offset_bottom = 393.0
 script = ExtResource("1_su8ig")
-wheel_velocity_helper = SubResource("Resource_gdc1a")
-dragging_velocity_helper = SubResource("Resource_xp6po")
+wheel_velocity_utility = SubResource("Resource_dgmji")
+dragging_velocity_utility = SubResource("Resource_nvbjt")
 debug_mode = true
 
 [node name="Control" type="Control" parent="SmoothScrollContainer"]

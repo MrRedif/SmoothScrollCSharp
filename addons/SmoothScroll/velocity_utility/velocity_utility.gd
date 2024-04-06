@@ -1,13 +1,14 @@
 @icon("icon.svg")
 extends Resource
-class_name VelocityHelper
+class_name VelocityUtility
 
 ## Abstract class
 
-## Attracting strength. The higher the value, the faster it attracts. 
-@export_range(0.001, 100000.0, 0.001, "or_greater", "hide_slider")
-var attracting_strength := 400.0:
-	set(val): attracting_strength= max(val, 0.001)
+## Magnetism. The higher the value, the faster it attracts. 
+@export_range(0.0, 1.0, 0.001, "or_greater", "hide_slider")
+var magnetism := 400.0:
+	set(val):
+		magnetism= max(val, 0.0)
 
 
 # Abstract method
@@ -57,7 +58,7 @@ func slide(velocity: float, delta_time: float) -> Array:
 func attract(from: float, to: float, velocity: float, delta_time: float) -> float:
 	var dist = to - from
 	var target_vel = _calculate_velocity_to_dest(from, to)
-	velocity += attracting_strength * dist * delta_time \
+	velocity += magnetism * dist * delta_time \
 		 + _calculate_velocity_by_time(delta_time) * sign(dist)
 	if (
 		(dist > 0 and velocity >= target_vel) \

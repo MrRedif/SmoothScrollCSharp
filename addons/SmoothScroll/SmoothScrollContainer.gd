@@ -10,14 +10,14 @@ class_name SmoothScrollContainer
 ## Drag impact for one scroll input
 @export_range(0, 10, 0.01, "or_greater", "hide_slider")
 var speed := 1000.0
-## VelocityHelper for wheel scrolling
+## VelocityUtility for wheel scrolling
 @export
-var wheel_velocity_helper: VelocityHelper = ExpoVelocityHelper.new()
+var wheel_velocity_utility: VelocityUtility = ExpoVelocityUtility.new()
 
 @export_group("Dragging")
-## VelocityHelper for dragging
+## VelocityUtility for dragging
 @export
-var dragging_velocity_helper: VelocityHelper = ExpoVelocityHelper.new()
+var dragging_velocity_utility: VelocityUtility = ExpoVelocityUtility.new()
 ### Allow dragging with mouse or not
 @export
 var drag_with_mouse = true
@@ -75,8 +75,8 @@ var velocity := Vector2(0,0)
 var content_node: Control
 ## Current position of `content_node`
 var pos := Vector2(0, 0)
-## Current VelocityHelper to use, recording to last input type
-var velocity_helper: VelocityHelper
+## Current VelocityUtility to use, recording to last input type
+var velocity_utility: VelocityUtility
 ## When true, `content_node`'s position is only set by dragging the h scroll bar
 var h_scrollbar_dragging := false
 ## When true, `content_node`'s position is only set by dragging the v scroll bar
@@ -116,7 +116,7 @@ func _ready() -> void:
 	if debug_mode:
 		setup_debug_drawing()
 	# Initialize variables
-	velocity_helper = wheel_velocity_helper
+	velocity_utility = wheel_velocity_utility
 	
 	get_v_scroll_bar().scrolling.connect(_on_VScrollBar_scrolling)
 	get_h_scroll_bar().scrolling.connect(_on_HScrollBar_scrolling)
@@ -182,7 +182,7 @@ func _gui_input(event: InputEvent) -> void:
 					else:
 						if should_scroll_vertical():
 							velocity.y -= speed
-					velocity_helper = wheel_velocity_helper
+					velocity_utility = wheel_velocity_utility
 					kill_scroll_to_tweens()
 			MOUSE_BUTTON_WHEEL_UP:
 				if event.pressed:
@@ -193,7 +193,7 @@ func _gui_input(event: InputEvent) -> void:
 					else:
 						if should_scroll_vertical():
 							velocity.y += speed
-					velocity_helper = wheel_velocity_helper
+					velocity_utility = wheel_velocity_utility
 					kill_scroll_to_tweens()
 			MOUSE_BUTTON_WHEEL_LEFT:
 				if event.pressed:
@@ -204,7 +204,7 @@ func _gui_input(event: InputEvent) -> void:
 					else:
 						if should_scroll_horizontal():
 							velocity.x += speed
-					velocity_helper = wheel_velocity_helper
+					velocity_utility = wheel_velocity_utility
 					kill_scroll_to_tweens()
 			MOUSE_BUTTON_WHEEL_RIGHT:
 				if event.pressed:
@@ -215,7 +215,7 @@ func _gui_input(event: InputEvent) -> void:
 					else:
 						if should_scroll_horizontal():
 							velocity.x -= speed
-					velocity_helper = wheel_velocity_helper
+					velocity_utility = wheel_velocity_utility
 					kill_scroll_to_tweens()
 			MOUSE_BUTTON_LEFT:
 				if event.pressed:
@@ -226,7 +226,7 @@ func _gui_input(event: InputEvent) -> void:
 					kill_scroll_to_tweens()
 				else:
 					content_dragging = false
-					velocity_helper = dragging_velocity_helper
+					velocity_utility = dragging_velocity_utility
 	
 	if (event is InputEventScreenDrag and drag_with_touch) \
 			or (event is InputEventMouseMotion and drag_with_mouse):
@@ -256,7 +256,7 @@ func _gui_input(event: InputEvent) -> void:
 			kill_scroll_to_tweens()
 		else:
 			content_dragging = false
-			velocity_helper = dragging_velocity_helper
+			velocity_utility = dragging_velocity_utility
 	# Handle input
 	get_tree().get_root().set_input_as_handled()
 
@@ -338,12 +338,12 @@ func scroll(vertical: bool, axis_velocity: float, axis_pos: float, delta: float)
 	else:
 		if not should_scroll_horizontal():
 			return
-	if !velocity_helper: return
+	if !velocity_utility: return
 	# Applies counterforces when overdragging
 	if not content_dragging:
 		axis_velocity = handle_overdrag(vertical, axis_velocity, axis_pos, delta)
 		# Move content node by applying velocity
-		var slide_result = velocity_helper.slide(axis_velocity, delta)
+		var slide_result = velocity_utility.slide(axis_velocity, delta)
 		axis_velocity = slide_result[0] * sign(axis_velocity)
 		axis_pos += slide_result[1] * sign(axis_velocity)
 		# Snap to boundary if close enough
@@ -385,7 +385,7 @@ func scroll(vertical: bool, axis_velocity: float, axis_pos: float, delta: float)
 		velocity.x = axis_velocity
 
 func handle_overdrag(vertical: bool, axis_velocity: float, axis_pos: float, delta: float) -> float:
-	if !velocity_helper: return 0.0
+	if !velocity_utility: return 0.0
 	# Calculate the size difference between this container and content_node
 	var size_diff = get_child_size_y_diff(content_node, true) \
 		if vertical else get_child_size_x_diff(content_node, true)
@@ -395,14 +395,14 @@ func handle_overdrag(vertical: bool, axis_velocity: float, axis_pos: float, delt
 	var dist2 = get_child_bottom_dist(axis_pos, size_diff) \
 		if vertical else get_child_right_dist(axis_pos, size_diff)
 	# Calculate velocity to left and right or top and bottom
-	var target_vel1 = velocity_helper._calculate_velocity_to_dest(dist1, 0.0)
-	var target_vel2 = velocity_helper._calculate_velocity_to_dest(dist2, 0.0)
+	var target_vel1 = velocity_utility._calculate_velocity_to_dest(dist1, 0.0)
+	var target_vel2 = velocity_utility._calculate_velocity_to_dest(dist2, 0.0)
 	# Bounce when out of boundary. When velocity is not fast enough to go back, 
 	# apply a opposite force and get a new velocity. If the new velocity is too fast, 
 	# apply a velocity that makes it scroll back exactly.
 	if axis_pos > 0.0:
 		if axis_velocity > target_vel1:
-			axis_velocity = velocity_helper.attract(
+			axis_velocity = velocity_utility.attract(
 				dist1,
 				0.0,
 				axis_velocity,
@@ -410,7 +410,7 @@ func handle_overdrag(vertical: bool, axis_velocity: float, axis_pos: float, delt
 			)
 	if axis_pos < -size_diff:
 		if axis_velocity < target_vel2:
-			axis_velocity = velocity_helper.attract(
+			axis_velocity = velocity_utility.attract(
 				dist2,
 				0.0,
 				axis_velocity,
@@ -460,7 +460,7 @@ func handle_scrollbar_drag() -> bool:
 	return false
 
 func handle_content_dragging() -> void:
-	if !dragging_velocity_helper: return
+	if !dragging_velocity_utility: return
 	
 	var calculate_dest = func(delta: float, damping: float) -> float:
 		if delta >= 0.0:
@@ -475,11 +475,11 @@ func handle_content_dragging() -> void:
 	) -> float:
 		if temp_relative + temp_dist1 > 0.0:
 			var delta = min(temp_relative, temp_relative + temp_dist1)
-			var dest = calculate_dest.call(delta, dragging_velocity_helper.attracting_strength)
+			var dest = calculate_dest.call(delta, dragging_velocity_utility.magnetism)
 			return dest - min(0.0, temp_dist1)
 		elif temp_relative + temp_dist2 < 0.0:
 			var delta = max(temp_relative, temp_relative + temp_dist2)
-			var dest = -calculate_dest.call(-delta, dragging_velocity_helper.attracting_strength)
+			var dest = -calculate_dest.call(-delta, dragging_velocity_utility.magnetism)
 			return dest - max(0.0, temp_dist2)
 		else: return temp_relative
 	

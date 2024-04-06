@@ -1,11 +1,11 @@
-extends VelocityHelper
-class_name CubicVelocityHelper
+extends VelocityUtility
+class_name CubicVelocityUtility
 
 
 ## Friction, not physical. 
 ## The higher the value, the more obvious the deceleration. 
-@export_range(0.001, 100000.0, 0.001, "or_greater", "hide_slider")
-var friction := 100000.0:
+@export_range(0.001, 10000.0, 0.001, "or_greater", "hide_slider")
+var friction := 10000.0:
 	set(val): friction = max(val, 0.001)
 
 
