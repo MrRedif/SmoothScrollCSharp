@@ -475,11 +475,11 @@ func handle_content_dragging() -> void:
 	) -> float:
 		if temp_relative + temp_dist1 > 0.0:
 			var delta = min(temp_relative, temp_relative + temp_dist1)
-			var dest = calculate_dest.call(delta, dragging_scroll_damper.rebound_strength)
+			var dest = calculate_dest.call(delta, dragging_scroll_damper._attract_factor)
 			return dest - min(0.0, temp_dist1)
 		elif temp_relative + temp_dist2 < 0.0:
 			var delta = max(temp_relative, temp_relative + temp_dist2)
-			var dest = -calculate_dest.call(-delta, dragging_scroll_damper.rebound_strength)
+			var dest = -calculate_dest.call(-delta, dragging_scroll_damper._attract_factor)
 			return dest - max(0.0, temp_dist2)
 		else: return temp_relative
 	
