@@ -221,12 +221,12 @@ func _gui_input(event: InputEvent) -> void:
 				if event.pressed:
 					if !drag_with_mouse: return
 					content_dragging = true
+					scroll_damper = dragging_scroll_damper
 					last_scroll_type = SCROLL_TYPE.DRAG
 					init_drag_temp_data()
 					kill_scroll_to_tweens()
 				else:
 					content_dragging = false
-					scroll_damper = dragging_scroll_damper
 	
 	if (event is InputEventScreenDrag and drag_with_touch) \
 			or (event is InputEventMouseMotion and drag_with_mouse):
@@ -251,12 +251,12 @@ func _gui_input(event: InputEvent) -> void:
 		if event.pressed:
 			if !drag_with_touch: return
 			content_dragging = true
+			scroll_damper = dragging_scroll_damper
 			last_scroll_type = SCROLL_TYPE.DRAG
 			init_drag_temp_data()
 			kill_scroll_to_tweens()
 		else:
 			content_dragging = false
-			scroll_damper = dragging_scroll_damper
 	# Handle input
 	get_tree().get_root().set_input_as_handled()
 
@@ -759,7 +759,8 @@ func any_scroll_bar_dragged() -> bool:
 ## Returns true if there is enough content height to scroll
 func should_scroll_vertical() -> bool:
 	var disable_scroll = (not allow_vertical_scroll) \
-		or (auto_allow_scroll and get_child_size_y_diff(content_node, false) <= 0)
+		or (auto_allow_scroll and get_child_size_y_diff(content_node, false) <= 0) \
+		or !scroll_damper
 	if disable_scroll:
 		velocity.y = 0.0
 		return false
@@ -769,7 +770,8 @@ func should_scroll_vertical() -> bool:
 ## Returns true if there is enough content width to scroll
 func should_scroll_horizontal() -> bool:
 	var disable_scroll = (not allow_horizontal_scroll) \
-		or (auto_allow_scroll and get_child_size_x_diff(content_node, false) <= 0)
+		or (auto_allow_scroll and get_child_size_x_diff(content_node, false) <= 0) \
+		or !scroll_damper
 	if disable_scroll:
 		velocity.x = 0.0
 		return false
