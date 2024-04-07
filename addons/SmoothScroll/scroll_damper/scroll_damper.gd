@@ -48,8 +48,8 @@ func _calculate_next_offset(present_time: float, delta_time: float) -> float:
 func slide(velocity: float, delta_time: float) -> Array:
 	var present_time = _calculate_time_by_velocity(velocity)
 	return [
-		_calculate_next_velocity(present_time, delta_time),
-		_calculate_next_offset(present_time, delta_time)
+		_calculate_next_velocity(present_time, delta_time) * sign(velocity),
+		_calculate_next_offset(present_time, delta_time) * sign(velocity)
 	]
 
 

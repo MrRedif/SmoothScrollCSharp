@@ -344,8 +344,8 @@ func scroll(vertical: bool, axis_velocity: float, axis_pos: float, delta: float)
 		axis_velocity = handle_overdrag(vertical, axis_velocity, axis_pos, delta)
 		# Move content node by applying velocity
 		var slide_result = scroll_damper.slide(axis_velocity, delta)
-		axis_velocity = slide_result[0] * sign(axis_velocity)
-		axis_pos += slide_result[1] * sign(axis_velocity)
+		axis_velocity = slide_result[0]
+		axis_pos += slide_result[1]
 		# Snap to boundary if close enough
 		var snap_result = snap(vertical, axis_velocity, axis_pos)
 		axis_velocity = snap_result[0]
