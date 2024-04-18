@@ -187,7 +187,7 @@ func _gui_input(event: InputEvent) -> void:
 			MOUSE_BUTTON_WHEEL_UP:
 				if event.pressed:
 					last_scroll_type = SCROLL_TYPE.WHEEL
-					if event.shift_pressed:
+					if event.shift_pressed or not should_scroll_vertical():
 						if should_scroll_horizontal():
 							velocity.x += speed
 					else:
@@ -745,7 +745,7 @@ func is_outside_left_boundary(x_pos: float = pos.x) -> bool:
 func is_outside_right_boundary(x_pos: float = pos.x) -> bool:
 	var size_x_diff = get_child_size_x_diff(content_node,true)
 	var right_dist = get_child_right_dist(x_pos, size_x_diff)
-	return right_dist > 0.0
+	return right_dist < 0.0
 
 ## Returns true if any scroll bar is being dragged
 func any_scroll_bar_dragged() -> bool:
