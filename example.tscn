@@ -75,6 +75,7 @@ offset_left = 259.0
 offset_top = 147.0
 offset_right = 649.0
 offset_bottom = 393.0
+follow_focus = true
 script = ExtResource("1_su8ig")
 wheel_scroll_damper = SubResource("Resource_lssh0")
 dragging_scroll_damper = SubResource("Resource_nvbjt")
