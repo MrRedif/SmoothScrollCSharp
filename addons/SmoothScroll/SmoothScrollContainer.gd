@@ -303,7 +303,7 @@ func _set_hide_scrollbar_over_time(value: bool) -> bool:
 			scrollbar_hide_timer.start(scrollbar_hide_time)
 	return value
 
-func _get(property):
+func _get(property) -> Variant:
 	match property:
 		"scroll_horizontal":
 			if !content_node: return 0
@@ -311,11 +311,15 @@ func _get(property):
 		"scroll_vertical":
 			if !content_node: return 0
 			return -int(content_node.position.y)
+		_:
+			return null
 
-func _set(property, value):
+func _set(property, value) -> bool:
 	match property:
 		"scroll_horizontal":
-			if !content_node: scroll_horizontal = 0
+			if !content_node:
+				scroll_horizontal = 0
+				return true
 			scroll_horizontal = value
 			velocity.x = 0.0
 			pos.x = clampf(
@@ -323,8 +327,11 @@ func _set(property, value):
 				-get_child_size_x_diff(content_node, true),
 				0.0
 			)
+			return true
 		"scroll_vertical":
-			if !content_node: scroll_vertical = 0
+			if !content_node:
+				scroll_vertical = 0
+				return true
 			scroll_vertical = value
 			velocity.y = 0.0
 			pos.y = clampf(
@@ -332,6 +339,9 @@ func _set(property, value):
 				-get_child_size_y_diff(content_node, true),
 				0.0
 			)
+			return true
+		_:
+			return false
 
 ##### Virtual functions
 ####################
