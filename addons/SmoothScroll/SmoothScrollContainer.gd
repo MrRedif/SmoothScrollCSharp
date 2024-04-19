@@ -29,9 +29,6 @@ var drag_with_touch = true
 ## Below this value, snap content to boundary
 @export
 var just_snap_under := 0.4
-## Scrolls to currently focused child element
-@export
-var follow_focus_ := true
 ## Margin of the currently focused element
 @export_range(0, 50)
 var follow_focus_margin := 20
@@ -95,6 +92,8 @@ var scroll_y_to_tween: Tween
 ## [2,3] Position where dragging starts[br]
 ## [4,5,6,7] Left_distance, right_distance, top_distance, bottom_distance
 var drag_temp_data := []
+## Whether touch point is in deadzone.
+var is_in_deadzone := false
 
 ## If content is being scrolled
 var is_scrolling := false:
@@ -178,10 +177,10 @@ func _gui_input(event: InputEvent) -> void:
 					last_scroll_type = SCROLL_TYPE.WHEEL
 					if event.shift_pressed or not should_scroll_vertical():
 						if should_scroll_horizontal():
-							velocity.x -= speed
+							velocity.x -= speed * event.factor
 					else:
 						if should_scroll_vertical():
-							velocity.y -= speed
+							velocity.y -= speed  * event.factor
 					scroll_damper = wheel_scroll_damper
 					kill_scroll_to_tweens()
 			MOUSE_BUTTON_WHEEL_UP:
@@ -189,10 +188,10 @@ func _gui_input(event: InputEvent) -> void:
 					last_scroll_type = SCROLL_TYPE.WHEEL
 					if event.shift_pressed or not should_scroll_vertical():
 						if should_scroll_horizontal():
-							velocity.x += speed
+							velocity.x += speed * event.factor
 					else:
 						if should_scroll_vertical():
-							velocity.y += speed
+							velocity.y += speed * event.factor
 					scroll_damper = wheel_scroll_damper
 					kill_scroll_to_tweens()
 			MOUSE_BUTTON_WHEEL_LEFT:
@@ -200,10 +199,10 @@ func _gui_input(event: InputEvent) -> void:
 					last_scroll_type = SCROLL_TYPE.WHEEL
 					if event.shift_pressed:
 						if should_scroll_vertical():
-							velocity.y -= speed
+							velocity.y -= speed * event.factor
 					else:
 						if should_scroll_horizontal():
-							velocity.x += speed
+							velocity.x += speed * event.factor
 					scroll_damper = wheel_scroll_damper
 					kill_scroll_to_tweens()
 			MOUSE_BUTTON_WHEEL_RIGHT:
@@ -211,22 +210,24 @@ func _gui_input(event: InputEvent) -> void:
 					last_scroll_type = SCROLL_TYPE.WHEEL
 					if event.shift_pressed:
 						if should_scroll_vertical():
-							velocity.y += speed
+							velocity.y += speed * event.factor
 					else:
 						if should_scroll_horizontal():
-							velocity.x -= speed
+							velocity.x -= speed * event.factor
 					scroll_damper = wheel_scroll_damper
 					kill_scroll_to_tweens()
 			MOUSE_BUTTON_LEFT:
 				if event.pressed:
 					if !drag_with_mouse: return
 					content_dragging = true
+					is_in_deadzone = true
 					scroll_damper = dragging_scroll_damper
 					last_scroll_type = SCROLL_TYPE.DRAG
 					init_drag_temp_data()
 					kill_scroll_to_tweens()
 				else:
 					content_dragging = false
+					is_in_deadzone = false
 	
 	if (event is InputEventScreenDrag and drag_with_touch) \
 			or (event is InputEventMouseMotion and drag_with_mouse):
@@ -251,43 +252,21 @@ func _gui_input(event: InputEvent) -> void:
 		if event.pressed:
 			if !drag_with_touch: return
 			content_dragging = true
+			is_in_deadzone = true
 			scroll_damper = dragging_scroll_damper
 			last_scroll_type = SCROLL_TYPE.DRAG
 			init_drag_temp_data()
 			kill_scroll_to_tweens()
 		else:
 			content_dragging = false
+			is_in_deadzone = false
 	# Handle input
 	get_tree().get_root().set_input_as_handled()
 
 # Scroll to new focused element
 func _on_focus_changed(control: Control) -> void:
-	var is_child := false
-	if content_node.is_ancestor_of(control):
-		is_child = true
-	if not is_child:
-		return
-	if not follow_focus_:
-		return
-	
-	var focus_size_x = control.size.x
-	var focus_size_y = control.size.y
-	var focus_left = control.global_position.x - self.global_position.x
-	var focus_right = focus_left + focus_size_x
-	var focus_top = control.global_position.y - self.global_position.y
-	var focus_bottom = focus_top + focus_size_y
-	
-	if focus_top < 0.0:
-		scroll_y_to(content_node.position.y - focus_top + follow_focus_margin)
-	
-	if focus_bottom > get_spare_size_y():
-		scroll_y_to(content_node.position.y - focus_bottom + get_spare_size_y() - follow_focus_margin)
-	
-	if focus_left < 0.0:
-		scroll_x_to(content_node.position.x - focus_left + follow_focus_margin)
-	
-	if focus_right > get_spare_size_x():
-		scroll_x_to(content_node.position.x - focus_right + get_spare_size_x() - follow_focus_margin)
+	if follow_focus:
+		self.ensure_control_visible(control)
 
 func _on_VScrollBar_scrolling() -> void:
 	v_scrollbar_dragging = true
@@ -323,6 +302,47 @@ func _set_hide_scrollbar_over_time(value: bool) -> bool:
 		if scrollbar_hide_timer != null and scrollbar_hide_timer.is_inside_tree():
 			scrollbar_hide_timer.start(scrollbar_hide_time)
 	return value
+
+func _get(property) -> Variant:
+	match property:
+		"scroll_horizontal":
+			if !content_node: return 0
+			return -int(content_node.position.x)
+		"scroll_vertical":
+			if !content_node: return 0
+			return -int(content_node.position.y)
+		_:
+			return null
+
+func _set(property, value) -> bool:
+	match property:
+		"scroll_horizontal":
+			if !content_node:
+				scroll_horizontal = 0
+				return true
+			scroll_horizontal = value
+			velocity.x = 0.0
+			pos.x = clampf(
+				-value as float,
+				-get_child_size_x_diff(content_node, true),
+				0.0
+			)
+			return true
+		"scroll_vertical":
+			if !content_node:
+				scroll_vertical = 0
+				return true
+			scroll_vertical = value
+			velocity.y = 0.0
+			pos.y = clampf(
+				-value as float,
+				-get_child_size_y_diff(content_node, true),
+				0.0
+			)
+			return true
+		_:
+			return false
+
 ##### Virtual functions
 ####################
 
@@ -461,6 +481,16 @@ func handle_scrollbar_drag() -> bool:
 
 func handle_content_dragging() -> void:
 	if !dragging_scroll_damper: return
+	
+	if(
+		Vector2(drag_temp_data[0], drag_temp_data[1]).length() < scroll_deadzone \
+		and is_in_deadzone
+	):
+		return
+	elif is_in_deadzone == true:
+		is_in_deadzone = false
+		drag_temp_data[0] = 0.0
+		drag_temp_data[1] = 0.0
 	
 	var calculate_dest = func(delta: float, damping: float) -> float:
 		if delta >= 0.0:
@@ -798,5 +828,28 @@ func show_scrollbars(time: float = scrollbar_fade_in_time) -> void:
 	scrollbar_hide_tween.tween_property(get_v_scroll_bar(), 'modulate', Color.WHITE, time)
 	scrollbar_hide_tween.tween_property(get_h_scroll_bar(), 'modulate', Color.WHITE, time)
 
+## Scroll to position to ensure control visible
+func ensure_control_visible(control : Control) -> void:
+	if !content_node: return
+	if !content_node.is_ancestor_of(control): return
+	if !scroll_damper: return
+	
+	var size_diff = (
+		control.get_global_rect().size - get_global_rect().size
+	) / (get_global_rect().size / size)
+	var boundary_dist = get_child_boundary_dist(
+		(control.global_position - global_position) \
+				/ (get_global_rect().size / size),
+		size_diff
+	)
+	var content_node_position = content_node.position
+	if boundary_dist.x < 0 + follow_focus_margin:
+		scroll_x_to(content_node_position.x - boundary_dist.x + follow_focus_margin)
+	elif boundary_dist.y > 0 - follow_focus_margin:
+		scroll_x_to(content_node_position.x - boundary_dist.y - follow_focus_margin)
+	if boundary_dist.z < 0 + follow_focus_margin:
+		scroll_y_to(content_node_position.y - boundary_dist.z + follow_focus_margin)
+	elif boundary_dist.w > 0 - follow_focus_margin:
+		scroll_y_to(content_node_position.y - boundary_dist.w - follow_focus_margin)
 ##### API FUNCTIONS
 ########################
