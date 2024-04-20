@@ -321,6 +321,7 @@ func _set(property, value) -> bool:
 				scroll_horizontal = 0
 				return true
 			scroll_horizontal = value
+			kill_scroll_x_to_tween()
 			velocity.x = 0.0
 			pos.x = clampf(
 				-value as float,
@@ -333,6 +334,7 @@ func _set(property, value) -> bool:
 				scroll_vertical = 0
 				return true
 			scroll_vertical = value
+			kill_scroll_y_to_tween()
 			velocity.y = 0.0
 			pos.y = clampf(
 				-value as float,
