@@ -98,11 +98,12 @@ var is_in_deadzone := false
 ## If content is being scrolled
 var is_scrolling := false:
 	set(val):
+		if is_scrolling != val:
+			if val:
+				emit_signal("scroll_started")
+			else:
+				emit_signal("scroll_ended")
 		is_scrolling = val
-		if is_scrolling:
-			emit_signal("scroll_started")
-		else:
-			emit_signal("scroll_ended")
 
 ## Last type of input used to scroll
 enum SCROLL_TYPE {WHEEL, BAR, DRAG}
@@ -232,7 +233,6 @@ func _gui_input(event: InputEvent) -> void:
 	if (event is InputEventScreenDrag and drag_with_touch) \
 			or (event is InputEventMouseMotion and drag_with_mouse):
 		if content_dragging:
-			is_scrolling = true
 			if should_scroll_horizontal():
 				drag_temp_data[0] += event.relative.x
 			if should_scroll_vertical():
@@ -541,10 +541,13 @@ func remove_all_children_focus(node: Node) -> void:
 		remove_all_children_focus(child)
 
 func update_state() -> void:
-	if content_dragging\
-	or v_scrollbar_dragging\
-	or h_scrollbar_dragging\
-	or velocity != Vector2.ZERO:
+	if(
+		(
+			(content_dragging or any_scroll_bar_dragged())
+			and not is_in_deadzone
+		)\
+		or velocity != Vector2.ZERO
+	):
 		is_scrolling = true
 	else:
 		is_scrolling = false
