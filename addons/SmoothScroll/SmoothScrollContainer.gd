@@ -118,10 +118,8 @@ func _ready() -> void:
 	# Initialize variables
 	scroll_damper = wheel_scroll_damper
 	
-	get_v_scroll_bar().scrolling.connect(_on_VScrollBar_scrolling)
-	get_h_scroll_bar().scrolling.connect(_on_HScrollBar_scrolling)
-	get_v_scroll_bar().gui_input.connect(_scrollbar_input)
-	get_h_scroll_bar().gui_input.connect(_scrollbar_input)
+	get_v_scroll_bar().gui_input.connect(_scrollbar_input.bind(true))
+	get_h_scroll_bar().gui_input.connect(_scrollbar_input.bind(false))
 	get_viewport().gui_focus_changed.connect(_on_focus_changed)
 
 	for c in get_children():
@@ -151,7 +149,7 @@ func _process(delta: float) -> void:
 		queue_redraw()
 
 # Forwarding scroll inputs from scrollbar
-func _scrollbar_input(event: InputEvent) -> void:
+func _scrollbar_input(event: InputEvent, vertical : bool) -> void:
 	if hide_scrollbar_over_time:
 		show_scrollbars()
 		scrollbar_hide_timer.start(scrollbar_hide_time)
@@ -162,14 +160,39 @@ func _scrollbar_input(event: InputEvent) -> void:
 		or event.button_index == MOUSE_BUTTON_WHEEL_LEFT\
 		or event.button_index == MOUSE_BUTTON_WHEEL_RIGHT:
 			_gui_input(event)
+		
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				if vertical:
+					v_scrollbar_dragging = true
+					kill_scroll_to_tweens()
+				else:
+					h_scrollbar_dragging = true
+					kill_scroll_to_tweens()
+			else:
+				if vertical:
+					v_scrollbar_dragging = false
+				else:
+					h_scrollbar_dragging = false
+	
+	if event is InputEventScreenTouch:
+		if event.pressed:
+			if vertical:
+				v_scrollbar_dragging = true
+				kill_scroll_to_tweens()
+			else:
+				h_scrollbar_dragging = true
+				kill_scroll_to_tweens()
+		else:
+			if vertical:
+				v_scrollbar_dragging = false
+			else:
+				h_scrollbar_dragging = false
 
 func _gui_input(event: InputEvent) -> void:
 	if hide_scrollbar_over_time:
 		show_scrollbars()
 		scrollbar_hide_timer.start(scrollbar_hide_time)
-
-	v_scrollbar_dragging = get_v_scroll_bar().has_focus() # != pressed => TODO
-	h_scrollbar_dragging = get_h_scroll_bar().has_focus()
 	
 	if event is InputEventMouseButton:
 		match event.button_index:
@@ -267,14 +290,6 @@ func _gui_input(event: InputEvent) -> void:
 func _on_focus_changed(control: Control) -> void:
 	if follow_focus:
 		self.ensure_control_visible(control)
-
-func _on_VScrollBar_scrolling() -> void:
-	v_scrollbar_dragging = true
-	last_scroll_type = SCROLL_TYPE.BAR
-
-func _on_HScrollBar_scrolling() -> void:
-	h_scrollbar_dragging = true
-	last_scroll_type = SCROLL_TYPE.BAR
 
 func _draw() -> void:
 	if debug_mode:
@@ -472,12 +487,12 @@ func snap(vertical: bool, axis_velocity: float, axis_pos: float) -> Array:
 func handle_scrollbar_drag() -> bool:
 	if h_scrollbar_dragging:
 		velocity.x = 0.0
-		pos.x = content_node.position.x
+		pos.x = -get_h_scroll_bar().value
 		return true
 	
 	if v_scrollbar_dragging:
 		velocity.y = 0.0
-		pos.y = content_node.position.y
+		pos.y = -get_v_scroll_bar().value
 		return true
 	return false
 
@@ -542,10 +557,8 @@ func remove_all_children_focus(node: Node) -> void:
 
 func update_state() -> void:
 	if(
-		(
-			(content_dragging or any_scroll_bar_dragged())
-			and not is_in_deadzone
-		)\
+		(content_dragging and not is_in_deadzone)
+		or any_scroll_bar_dragged()
 		or velocity != Vector2.ZERO
 	):
 		is_scrolling = true
@@ -784,12 +797,7 @@ func is_outside_right_boundary(x_pos: float = pos.x) -> bool:
 
 ## Returns true if any scroll bar is being dragged
 func any_scroll_bar_dragged() -> bool:
-	if get_v_scroll_bar():
-		if get_v_scroll_bar().has_focus():
-			return true
-	if get_h_scroll_bar().has_focus():
-			return true
-	return false
+	return h_scrollbar_dragging or v_scrollbar_dragging
 
 ## Returns true if there is enough content height to scroll
 func should_scroll_vertical() -> bool:
