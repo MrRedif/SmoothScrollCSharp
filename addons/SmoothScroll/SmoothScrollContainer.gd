@@ -165,9 +165,11 @@ func _scrollbar_input(event: InputEvent, vertical : bool) -> void:
 			if event.pressed:
 				if vertical:
 					v_scrollbar_dragging = true
+					last_scroll_type = SCROLL_TYPE.BAR
 					kill_scroll_to_tweens()
 				else:
 					h_scrollbar_dragging = true
+					last_scroll_type = SCROLL_TYPE.BAR
 					kill_scroll_to_tweens()
 			else:
 				if vertical:
@@ -179,9 +181,11 @@ func _scrollbar_input(event: InputEvent, vertical : bool) -> void:
 		if event.pressed:
 			if vertical:
 				v_scrollbar_dragging = true
+				last_scroll_type = SCROLL_TYPE.BAR
 				kill_scroll_to_tweens()
 			else:
 				h_scrollbar_dragging = true
+				last_scroll_type = SCROLL_TYPE.BAR
 				kill_scroll_to_tweens()
 		else:
 			if vertical:
