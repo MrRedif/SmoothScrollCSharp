@@ -2,7 +2,7 @@
  A customizable SmoothScrollContainer node for Godot
 
 This is a C# port of [SmoothScroll by SpyrexDE](https://github.com/SpyrexDE/SmoothScroll). 
-The main reason this port exists is to create a workaround of [this issue](https://github.com/godotengine/godot/issues/78642) of gdscript plugins, specificly [this](https://github.com/SpyrexDE/SmoothScroll/issues/51).
+The main reason this port exists is to create a workaround for [this issue](https://github.com/godotengine/godot/issues/78642) involving gdscript plugins, specificly [this](https://github.com/SpyrexDE/SmoothScroll/issues/51).
 
 [Watch video footage on Youtube](https://www.youtube.com/watch?v=B3GjqV2c6yQ)
 
