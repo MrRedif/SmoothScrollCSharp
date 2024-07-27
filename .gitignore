@@ -2,3 +2,6 @@
 .godot/
 .vs/
 Properties/
+*.csproj
+*.csproj.user
+*.sln
