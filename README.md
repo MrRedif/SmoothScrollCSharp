@@ -1,5 +1,8 @@
-# <img src="./addons/SmoothScroll/class-icon.svg" alt="drawing" width="20" style="padding-top: 20px;"/>   SmoothScroll
+# <img src="./addons/SmoothScrollCSharp/class-icon-csharp.svg" alt="drawing" width="20" style="padding-top: 20px;"/>   SmoothScroll C#
  A customizable SmoothScrollContainer node for Godot
+
+This is a C# port of [SmoothScroll by SpyrexDE](https://github.com/SpyrexDE/SmoothScroll). 
+The main reason this port exists is to create a workaround of [this issue](https://github.com/godotengine/godot/issues/78642) of gdscript plugins, specificly [this](https://github.com/SpyrexDE/SmoothScroll/issues/51).
 
 [Watch video footage on Youtube](https://www.youtube.com/watch?v=B3GjqV2c6yQ)
 

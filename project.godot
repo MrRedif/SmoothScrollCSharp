@@ -11,17 +11,21 @@ config_version=5
 [application]
 
 config/name="Smooth Scroll"
-run/main_scene="res://example.tscn"
-config/features=PackedStringArray("4.2")
-config/icon="res://addons/SmoothScroll/class-icon.svg"
+run/main_scene="res://addons/SmoothScrollCSharp/example_smooth_scroll_container.tscn"
+config/features=PackedStringArray("4.2", "C#")
+config/icon="res://addons/SmoothScrollCSharp/class-icon-csharp.png"
 
 [display]
 
 window/stretch/mode="canvas_items"
 
+[dotnet]
+
+project/assembly_name="Smooth Scroll"
+
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/SmoothScroll/plugin.cfg")
+enabled=PackedStringArray("res://addons/SmoothScrollCSharp/plugin.cfg")
 
 [gui]
 

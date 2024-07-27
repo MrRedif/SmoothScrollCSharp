@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://4ok12qtgl7xq"
-path="res://.godot/imported/icon.svg-5b01e8115f19d6d63dc265815ce29c75.ctex"
+uid="uid://cww5tsyc3glru"
+path="res://.godot/imported/class-icon-csharp.png-ddb9a581fd7a5ee9b8a577996209d108.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/SmoothScroll/scroll_damper/icon.svg"
-dest_files=["res://.godot/imported/icon.svg-5b01e8115f19d6d63dc265815ce29c75.ctex"]
+source_file="res://addons/SmoothScrollCSharp/class-icon-csharp.png"
+dest_files=["res://.godot/imported/class-icon-csharp.png-ddb9a581fd7a5ee9b8a577996209d108.ctex"]
 
 [params]
 
@@ -32,6 +32,3 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
-svg/scale=1.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false
