@@ -1420,7 +1420,7 @@ public partial class SmoothScrollContainer : ScrollContainer
         ShowScrollbars(scrollbarFadeInTime);
     }
 
-    public void EnsureControlVisible(Control control)
+    public new void EnsureControlVisible(Control control)
     {
         if (contentNode == null) return;
         if (contentNode.IsAncestorOf(control)) return;
